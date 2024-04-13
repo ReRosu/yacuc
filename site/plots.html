@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+    </head>
+    <body>
+        <select id="from-db-select">
+            <option value="clickhouse">clickhouse</option>
+            <option value="postgresql">postgresql</option>
+        </select>
+        <input type="number" id="downsample-to" name="tentacles" value="3000" />
+        <a id="ttg"></a>
+        <div id="plot_div"></div>
+        <script>
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            var socket = new WebSocket('ws://localhost:8080/api/plots/ws')
+            plot_div = document.getElementById('plot_div');
+            function relayout_send(data){
+                from_db_select = document.getElementById('from-db-select');
+                downsample_to = document.getElementById('downsample-to');
+                let payload
+                if('xaxis.autorange' in data){
+                    payload = {
+                        left_border: null,
+                        right_border: null,
+                        from_db: from_db_select.value,
+                        downsample_to: downsample_to.value
+                    }
+                }
+                else if('xaxis.range[0]' in data){
+                    payload = {
+                        left_border: data['xaxis.range[0]'],
+                        right_border: data['xaxis.range[1]'],
+                        from_db: from_db_select.value,
+                        downsample_to: downsample_to.value
+                    }
+                }
+                if(!(payload === undefined)){
+                    socket.send(data=JSON.stringify(payload))
+                }
+            }
+            function on_ws_message(event){
+                var incoming = JSON.parse(event.data)
+                let plot = incoming.plots[0]
+                
+                Plotly.deleteTraces(plot_div, 0)
+                Plotly.addTraces(plot_div, {
+                    x: plot['x'],
+                    y: plot['y'],
+                    mode: 'markers'
+                }, 0)
+                document.getElementById('ttg').innerText = `Last time to get data: ${incoming.time_to_get_data}`
+            }
+            socket.onmessage = on_ws_message
+            socket.onopen = function(event){
+                Plotly.newPlot( 
+                    plot_div, 
+                    [{
+                        x: [],
+                        y: [],
+                        mode: 'markers'
+                    }], 
+                    {
+                        margin: { t: 10 }
+                    } 
+                );
+                plot_div.on('plotly_relayout', relayout_send)
+                relayout_send({
+                    "xaxis.autorange": 'abob'
+                })
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,43 @@
+version: '3'
+networks:
+  app:
+    driver: 'bridge'
+services:
+  clickhouse-db:
+    container_name: clickhouse-db
+    image: clickhouse/clickhouse-server:latest
+    environment:
+      - CLICKHOUSE_DB=$clickhouse_database
+      - CLICKHOUSE_USER=$clickhouse_user
+      - CLICKHOUSE_PASSWORD=$clickhouse_password
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - clickhouse-data:/var/log/clickhouse-server/
+      - ./csv_for_dbs/:/var/lib/clickhouse/user_files
+    ulimits:
+      nofile: 262144
+    networks:
+        - app
+  postgres:
+    container_name: postgres-db
+    image: postgres:alpine3.18
+    environment:
+      POSTGRES_DB: $postgres_db
+      POSTGRES_USER: $postgres_user
+      POSTGRES_PASSWORD: $postgres_password
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./csv_for_dbs/:/user_files/
+    ports:
+      - "5432:5432"
+    networks:
+        - app
+
+volumes:
+  clickhouse-data:
+  postgres-data:

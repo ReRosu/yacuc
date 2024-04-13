@@ -16,3 +16,4 @@ examples
 dev_test*
 poetry.lock
 .env
+*.csv
