@@ -49,18 +49,3 @@ def get_plot_from_clickhouse(
 
     data: pd.DataFrame = ch_client.query_df(get_data_q)
     return {"x": data["dt"].to_numpy(), "y": data["metric_value"].to_numpy()}
-
-
-def setup_clickhouse(ch_client: Client):
-    query = """
-        create table if not exists metrics_data(
-            entity_id UInt32,
-            dt DateTime64(3),
-            metric_type UInt32,
-            metric_value Float64
-        ) ENGINE = MergeTree()
-        partition by metric_type
-        order by (entity_id, cityHash64(dt), metric_type)
-        sample by cityHash64(dt)
-    """
-    ch_client.command(query)

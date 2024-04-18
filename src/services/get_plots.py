@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from src.core.enums import DBEnum
-from src.core.misc import ch_client
+from src.core.misc import ch_client, pg_connect
 from src.entities.plot import PlotFromDB
 from src.services.clickhouse import get_plot_from_clickhouse
 from src.services.postgresql import get_plot_from_pg
@@ -27,6 +27,7 @@ def get_plot(
             )
         case DBEnum.postgresql:
             pg_plot = get_plot_from_pg(
+                pg_connect=pg_connect,
                 entity_id=entity_id,
                 metric_type=metric_type,
                 left_border=left_border,
