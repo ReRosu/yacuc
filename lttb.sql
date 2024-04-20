@@ -27,7 +27,7 @@ $function$
 ;
 
 
-create TYPE ts_dot as (
+create TYPE if not exists ts_dot as (
     x timestamp,
     y float8
 );
