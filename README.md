@@ -6,6 +6,8 @@
 ### Сообщество Python Уфа
 - https://t.me/ufa_python
 
+### Ссылка на доклад
+- https://docs.google.com/presentation/d/1ekWWN_OHUfayF0REJm9FCIrTbV7UK-lY8ZtviaS9YL4/edit?usp=sharing
 
 ### Установка зависимостей через Poetry
 ~~~
